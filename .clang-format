@@ -1,0 +1,81 @@
+# Lenguaje base para el estilo
+Language: Cpp
+# Estilo base del que heredar. Opciones: LLVM, Google, Chromium, Mozilla, WebKit, Microsoft, GNU
+BasedOnStyle: Google
+
+# --- Modificaciones al estilo base ---
+
+# Sangría
+IndentWidth: 4
+UseTab: Never # Usar espacios para la sangría
+TabWidth: 4   # Cómo clang-format interpreta los tabs existentes (si UseTab fuera Always)
+
+# Saltos de línea
+BreakBeforeBraces: Custom # Permite más control con BraceWrapping
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Always # if, for, while, switch, do, etc.
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false # No sangrar las llaves en sí mismas
+  SplitEmptyFunction: true # Si la función está vacía, llaves en líneas separadas
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# Espacios
+SpaceBeforeParens: ControlStatements # if ( true ), for ( int i... ), pero miFuncion()
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceAfterCStyleCast: true
+SpaceBeforeAssignmentOperators: true
+SpaceAfterAssignmentOperators: true
+
+# Punteros y Referencias
+# Opciones: Left, Right, Middle
+# PointerAlignment: Left   # (*) a la izquierda: int* x
+# PointerAlignment: Right  # (*) a la derecha: int *x (Estilo Google por defecto)
+PointerAlignment: Left # Común en muchos proyectos, aunque Google usa Right
+
+# Columnas
+ColumnLimit: 100 # Límite de caracteres por línea
+
+# Comentarios
+ReflowComments: true # Reajusta comentarios largos para que quepan en ColumnLimit
+
+# Includes
+SortIncludes: true # Ordena los includes alfabéticamente (puede necesitar más configuración para priorizar headers)
+IncludeBlocks: Regroup # Agrupa y reordena bloques de includes
+
+# Otros
+AllowShortFunctionsOnASingleLine: None # No permitir funciones cortas en una línea
+AllowShortBlocksOnASingleLine: false # No permitir bloques cortos (if, else) en una línea
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All # Permite lambdas cortas en una línea si caben
+
+# C++11 y superior
+Cpp11BracedListStyle: true # Para listas de inicialización con llaves { }
+
+# Namespace
+NamespaceIndentation: None # No sangrar el contenido dentro de los namespaces
+
+# Continuación de líneas
+ContinuationIndentWidth: 8 # Sangría para líneas continuadas (el doble de IndentWidth es común)
+
+# Coma al final en listas de inicialización (Trailing Commas)
+# C++20 introdujo [[no_unique_address]], que puede ser afectado por esto.
+# Opciones: None, Vertically (solo si la lista se rompe en múltiples líneas), Always (siempre que sea legal)
+# CommaAfterTrailingCall: false # Para SFML y OpenGL a veces causa problemas con macros
+# Standard: Cpp17 (o Cpp20, etc., según tu proyecto)
+
+# Fin del archivo
+# Asegura una línea nueva al final del archivo
+InsertNewlineAtEOF: true

@@ -1,0 +1,184 @@
+# Compiled Object files, Dylibs, Executables
+*.slo
+*.lo
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.i* # Preprocessed C files
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+CMakeLists.txt.user
+Makefile # Si CMake genera Makefiles y no quieres versionarlos
+*.ninja # Si usas Ninja como generador
+*.xcodeproj/
+*.xcworkspace/
+*.sln
+*.suo
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build directory
+build/
+build-*/ # Catches build-debug, build-release etc.
+_build/
+out/
+bin/
+Build/
+# También puedes ser más específico si siempre usas "build"
+# /build/
+
+# IDE-specific files
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/c_cpp_properties.json # Usualmente se quiere versionar para configuración del proyecto
+
+# Visual Studio
+.vs/
+*.VC.db
+*.[Ss]olution[Oo]ptions
+*.APS
+*.ncb
+*.opensdf
+*.sdf
+*.psess
+*.vsp
+*.vspx
+*.log
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# CLion
+.idea/
+*.iml
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+
+# Xcode
+#
+# Podrías querer versionar el xcodeproj si trabajas directamente con él,
+# pero si lo genera CMake, es mejor ignorarlo y regenerarlo.
+# *.xcodeproj/*
+# !*.xcodeproj/project.pbxproj
+# !*.xcodeproj/project.xcworkspace/
+# !*.xcodeproj/xcshareddata/
+# !*.xcodeproj/xcuserdata/
+xcuserdata/
+
+# Eclipse
+.cproject
+.project
+.settings/
+*.launch
+
+# NetBeans
+nbproject/
+nbactions.xml
+build.xml
+
+# CodeLite
+*.project
+*.workspace
+
+# Ctags
+tags
+.tags
+
+# Doxygen documentation
+DoxygenAwesome.css
+DoxygenLayout.xml
+html/
+latex/
+
+# Profiler output
+*.prof
+*.profraw
+callgrind.out.*
+pprof.*
+profile.txt
+
+# Test coverage
+*.gcno
+*.gcda
+*.gcov
+*.coverage
+*.lcov
+coverage/
+.fuzz/
+
+# Python virtualenv
+venv/
+ENV/
+env/
+.venv/
+.env/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json # A veces se versiona, a veces no, depende del proyecto
+yarn.lock       # A veces se versiona
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.swp
+*~
+*.tmp
+*.bak
+*.stackdump
+
+# User-specific files (general)
+*.user
+
+# vcpkg (si no quieres versionar los paquetes instalados localmente)
+# Esto es si usas vcpkg en modo clásico y no quieres que `vcpkg_installed`
+# se suba si lo tienes dentro del proyecto.
+# Si usas vcpkg con un manifiesto (`vcpkg.json`), `vcpkg_installed`
+# suele estar fuera del proyecto o en el `build` dir.
+# vcpkg_installed/
+
+# SFML/MPI specific (si generas algo localmente que no deba ir al repo)
+# (Normalmente, las bibliotecas deben ser dependencias externas o manejadas por vcpkg/CMake)
+
+# Output de tu aplicación específica si es necesario
+# output_data/
+# results/
