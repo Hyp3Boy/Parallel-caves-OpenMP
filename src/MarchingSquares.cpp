@@ -1,140 +1,131 @@
 #include "MarchingSquares.hpp"
 
-#include <SFML/Graphics/Vertex.hpp>  // Para sf::Vertex y sf::VertexArray si lo usas directamente
+#include <omp.h>
 
 MarchingSquares::MarchingSquares(float squareSize) : TILE_SIZE(squareSize)
 {
 }
 
-// Esta es una implementación MUY básica y conceptual de Marching Squares.
-// Necesitarás consultar algoritmos completos para todos los 16 casos.
-std::vector<LineSegment> MarchingSquares::generateMesh(const Grid &subGrid, int globalOffsetY)
+std::vector<LineSegment> MarchingSquares::generateMesh(const LocalGrid &grid)
 {
-    std::vector<LineSegment> lines;
-    if (subGrid.empty() || subGrid[0].empty())
-        return lines;
+    if (grid.empty() || grid[0].empty())
+        return {};
 
-    int rows = subGrid.size();
-    int cols = subGrid[0].size();
+    std::vector<LineSegment> allLines;
+    int rows = grid.size();
+    int cols = grid[0].size();
 
-    for (int y = 0; y < rows - 1; ++y)
+#pragma omp parallel
     {
-        for (int x = 0; x < cols - 1; ++x)
+        std::vector<LineSegment> localLines;
+
+#pragma omp for
+        for (int y = 0; y < rows - 1; ++y)
         {
-            // Definir los 4 puntos de control de la celda actual
-            // Los valores '1' de la grid son paredes, '0' son espacio abierto.
-            // Marching Squares usualmente define "activo" como estar DENTRO del objeto.
-            // Aquí, si el valor de la grid es 1 (pared), lo consideramos "inactivo" para el espacio
-            // abierto. O, si lo prefieres, considera que "activo" es ser una pared. Vamos a asumir
-            // que generamos líneas para el contorno de las paredes. Entonces, un nodo está "activo"
-            // si es parte de una pared.
+            for (int x = 0; x < cols - 1; ++x)
+            {
+                Square mSquare = {
+                        /*topLeft*/ ControlNode({(float) x * TILE_SIZE, (float) y * TILE_SIZE},
+                                                grid[y][x] == 1),
+                        /*topRight*/
+                        ControlNode({(float) (x + 1) * TILE_SIZE, (float) y * TILE_SIZE},
+                                    grid[y][x + 1] == 1),
+                        /*bottomRight*/
+                        ControlNode({(float) (x + 1) * TILE_SIZE, (float) (y + 1) * TILE_SIZE},
+                                    grid[y + 1][x + 1] == 1),
+                        /*bottomLeft*/
+                        ControlNode({(float) x * TILE_SIZE, (float) (y + 1) * TILE_SIZE},
+                                    grid[y + 1][x] == 1)};
 
-            Square mSquare = {
-                    /*topLeft*/ ControlNode(
-                            {(float) x * TILE_SIZE, (float) (y + globalOffsetY) * TILE_SIZE},
-                            subGrid[y][x] == 1),
-                    /*topRight*/
-                    ControlNode(
-                            {(float) (x + 1) * TILE_SIZE, (float) (y + globalOffsetY) * TILE_SIZE},
-                            subGrid[y][x + 1] == 1),
-                    /*bottomRight*/
-                    ControlNode({(float) (x + 1) * TILE_SIZE,
-                                 (float) (y + 1 + globalOffsetY) * TILE_SIZE},
-                                subGrid[y + 1][x + 1] == 1),
-                    /*bottomLeft*/
-                    ControlNode(
-                            {(float) x * TILE_SIZE, (float) (y + 1 + globalOffsetY) * TILE_SIZE},
-                            subGrid[y + 1][x] == 1)};
+                mSquare.top = sf::Vector2f(mSquare.topLeft.position.x + TILE_SIZE / 2.f,
+                                           mSquare.topLeft.position.y);
+                mSquare.right = sf::Vector2f(mSquare.topRight.position.x,
+                                             mSquare.topRight.position.y + TILE_SIZE / 2.f);
+                mSquare.bottom = sf::Vector2f(mSquare.bottomLeft.position.x + TILE_SIZE / 2.f,
+                                              mSquare.bottomLeft.position.y);
+                mSquare.left = sf::Vector2f(mSquare.topLeft.position.x,
+                                            mSquare.topLeft.position.y + TILE_SIZE / 2.f);
 
-            // Calcular puntos medios (simplificado, sin interpolación real aquí)
-            mSquare.top = sf::Vector2f(mSquare.topLeft.position.x + TILE_SIZE / 2.f,
-                                       mSquare.topLeft.position.y);
-            mSquare.right = sf::Vector2f(mSquare.topRight.position.x,
-                                         mSquare.topRight.position.y + TILE_SIZE / 2.f);
-            mSquare.bottom = sf::Vector2f(mSquare.bottomLeft.position.x + TILE_SIZE / 2.f,
-                                          mSquare.bottomLeft.position.y);
-            mSquare.left = sf::Vector2f(mSquare.topLeft.position.x,
-                                        mSquare.topLeft.position.y + TILE_SIZE / 2.f);
+                int config = getConfiguration(mSquare);
+                processSquare(mSquare, config, localLines);
+            }
+        }
 
-            int config = getConfiguration(mSquare);
-            processSquare(mSquare, config, lines);
+#pragma omp critical
+        {
+            allLines.insert(allLines.end(), localLines.begin(), localLines.end());
         }
     }
-    return lines;
+    return allLines;
 }
 
 int MarchingSquares::getConfiguration(const Square &square)
 {
     int configuration = 0;
     if (square.topLeft.active)
-        configuration |= 8;  // 1000
+        configuration |= 8;
     if (square.topRight.active)
-        configuration |= 4;  // 0100
+        configuration |= 4;
     if (square.bottomRight.active)
-        configuration |= 2;  // 0010
+        configuration |= 2;
     if (square.bottomLeft.active)
-        configuration |= 1;  // 0001
+        configuration |= 1;
     return configuration;
 }
 
-// Necesitarás implementar los 16 casos de Marching Squares
 void MarchingSquares::processSquare(const Square &mSquare, int config,
                                     std::vector<LineSegment> &lines)
 {
-    // Ejemplo para un caso simple (esquina superior izquierda activa)
     switch (config)
     {
         case 0:
-            break;  // No lines
+            break;
         case 1:
             lines.push_back({mSquare.left, mSquare.bottom});
-            break;  // bottom-left
+            break;
         case 2:
             lines.push_back({mSquare.bottom, mSquare.right});
-            break;  // bottom-right
+            break;
         case 3:
             lines.push_back({mSquare.left, mSquare.right});
-            break;  // bottom-left & bottom-right
+            break;
         case 4:
             lines.push_back({mSquare.top, mSquare.right});
-            break;  // top-right
-        // ... y así sucesivamente para los 16 casos (o 15 sin el 0)
-        // Casos como el 5 (top-right y bottom-left) pueden necesitar dos líneas o manejo de
-        // ambigüedad.
-        case 5:  // top-right and bottom-left (ambiguous or two lines)
+            break;
+        case 5:
             lines.push_back({mSquare.top, mSquare.right});
             lines.push_back({mSquare.left, mSquare.bottom});
             break;
         case 6:
             lines.push_back({mSquare.top, mSquare.bottom});
-            break;  // top-right & bottom-right
+            break;
         case 7:
             lines.push_back({mSquare.left, mSquare.top});
-            break;  // all but top-left
+            break;
         case 8:
             lines.push_back({mSquare.top, mSquare.left});
-            break;  // top-left
+            break;
         case 9:
             lines.push_back({mSquare.top, mSquare.bottom});
-            break;  // top-left & bottom-left
-        case 10:    // top-left and bottom-right (ambiguous or two lines)
+            break;
+        case 10:
             lines.push_back({mSquare.top, mSquare.left});
             lines.push_back({mSquare.bottom, mSquare.right});
             break;
         case 11:
             lines.push_back({mSquare.top, mSquare.right});
-            break;  // all but top-right
+            break;
         case 12:
             lines.push_back({mSquare.left, mSquare.right});
-            break;  // top-left & top-right
+            break;
         case 13:
             lines.push_back({mSquare.bottom, mSquare.right});
-            break;  // all but bottom-right
+            break;
         case 14:
             lines.push_back({mSquare.bottom, mSquare.left});
-            break;  // all but bottom-left
+            break;
         case 15:
-            break;  // All active, no lines (or lines around border if that's the convention)
+            break;
         default:
             break;
     }
