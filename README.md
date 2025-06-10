@@ -74,13 +74,16 @@ El proyecto incluye un `Makefile` que simplifica los comandos de CMake.
 ## Estructura del Proyecto
 
 
+
+```
 ParallelCavesOMP/
-├── CMakeLists.txt # Script de compilación principal para CMake
-├── Makefile # Envoltorio para simplificar los comandos de CMake
-├── README.md # Este archivo
-└── src/ # Directorio del código fuente
-├── main.cpp # Punto de entrada, animación, renderizado SFML
-├── CaveGenerator.hpp # Definición de la clase para generar el mapa
-├── CaveGenerator.cpp # Implementación de CaveGenerator
-├── MarchingSquares.hpp # Definición de la clase para Marching Squares
-└── MarchingSquares.cpp # Implementación de Marching Squares
+├── CMakeLists.txt        # Script de compilación principal para CMake
+├── Makefile              # Envoltorio para simplificar los comandos de CMake
+├── README.md             # Este archivo
+└── src/                  # Directorio del código fuente
+    ├── main.cpp          # Punto de entrada, animación, renderizado SFML
+    ├── CaveGenerator.hpp # Definición de la clase para generar el mapa
+    ├── CaveGenerator.cpp # Implementación de CaveGenerator
+    ├── MarchingSquares.hpp # Definición de la clase para Marching Squares
+    └── MarchingSquares.cpp # Implementación de Marching Squares
+```
