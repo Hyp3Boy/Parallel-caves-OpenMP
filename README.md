@@ -46,10 +46,9 @@ El proyecto incluye un `Makefile` que simplifica los comandos de CMake.
 
 1.  **Clona el repositorio:**
     ```bash
-    git clone https://github.com/TU_USUARIO/ParallelCavesOMP.git
+    git clone https://github.com/Hyp3Boy/ParallelCavesOMP.git
     cd ParallelCavesOMP
     ```
-    *(Reemplaza `TU_USUARIO` con tu nombre de usuario).*
 
 2.  **Compilación (Primera Vez):**
     La primera vez que compiles el proyecto, es una buena práctica usar el comando `build`. Esto creará un directorio `build/`, configurará el proyecto con CMake y lo compilará. Este paso puede tardar un poco la primera vez, ya que también descargará SFML.
