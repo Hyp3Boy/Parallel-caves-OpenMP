@@ -1,110 +1,46 @@
-# --- OMP-CHANGE: Cambiamos el nombre del ejecutable ---
-TARGET = ParallelCavesOMP
+# Nombre del ejecutable final (debe coincidir con el de CMakeLists.txt)
+TARGET_NAME = ParallelCavesOMP
+BUILD_DIR = build
+EXECUTABLE = $(BUILD_DIR)/bin/$(TARGET_NAME)
 
-# --- OMP-CHANGE: Cambiamos el compilador de MPI a Clang++ estándar de macOS ---
-CXX = clang++
+# --- Detección del Sistema Operativo para elegir el compilador ---
+# Por defecto, no pasamos flags especiales de compilador
+CMAKE_COMPILER_FLAGS =
 
-# Directorios de código fuente (sin cambios)
-SRC_DIR = src
-OBJ_DIR = obj
-LOCAL_INCLUDES = -I$(SRC_DIR)
-
-# --- Flags de Compilación y Enlace ---
-# CXXFLAGS: Flags base para el compilador C++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g -O2 # -g para depurar, -O2 para optimizar
-
-# LDFLAGS: Flags base para el enlazador
-LDFLAGS =
-
-# --- Detección del Sistema Operativo y Arquitectura (sin cambios) ---
-UNAME_S := $(shell uname -s)
-UNAME_M := $(shell uname -m)
-
-# --- OMP-CHANGE: Configuración de OpenMP para macOS con libomp de Homebrew ---
-# Asumimos que libomp fue instalado con 'brew install libomp'
-# Usamos 'brew --prefix' para encontrar la ruta de instalación automáticamente.
-OMP_BASE_DIR ?= $(shell brew --prefix libomp)
-OMP_CFLAGS = -Xpreprocessor -fopenmp -I$(OMP_BASE_DIR)/include
-OMP_LDFLAGS = -L$(OMP_BASE_DIR)/lib
-OMP_LIBS = -lomp
-
-# Agregamos los flags de OpenMP a las variables globales
-CXXFLAGS += $(OMP_CFLAGS)
-LDFLAGS += $(OMP_LDFLAGS)
-
-
-# --- Configuración de SFML 3.0.1 (sin cambios, esta lógica es robusta) ---
-# El usuario DEBE verificar estas rutas o sobreescribirlas si son diferentes.
-ifeq ($(UNAME_S),Darwin) # macOS
-    ifeq ($(UNAME_M),arm64) # Apple Silicon M1/M2/M3
-        SFML_BASE_DIR ?= /opt/homebrew/Cellar/sfml/3.0.1
-    else # Intel macOS
-        SFML_BASE_DIR ?= /usr/local/Cellar/sfml/3.0.1
-    endif
-else # Linux (ejemplo)
-    SFML_BASE_DIR ?= /usr/local
+# Si el sistema es Darwin (macOS)...
+ifeq ($(shell uname -s), Darwin)
+	# ...le decimos a CMake que use Clang explícitamente.
+	CMAKE_COMPILER_FLAGS = -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++
 endif
 
-SFML_INCLUDE_DIR ?= $(SFML_BASE_DIR)/include
-SFML_LIB_DIR ?= $(SFML_BASE_DIR)/lib
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+# .PHONY asegura que estos "targets" se ejecuten siempre,
+# incluso si existe un archivo con el mismo nombre.
+.PHONY: all build run clean help
 
+# El target por defecto: si solo escribes 'make', compilará.
+all: build
 
-# --- Agregado de Inclusiones y Bibliotecas ---
-INCLUDES = $(LOCAL_INCLUDES) -I$(SFML_INCLUDE_DIR)
-LDFLAGS += -L$(SFML_LIB_DIR)
+# Compila el proyecto.
+# Usamos los flags de compilador que definimos arriba.
+build:
+	@echo "--- Configurando y Compilando con CMake ---"
+	@cmake -S . -B $(BUILD_DIR) $(CMAKE_COMPILER_FLAGS)
+	@cmake --build $(BUILD_DIR)
 
-# Combinamos las bibliotecas de SFML y OpenMP
-LIBS = $(SFML_LIBS) $(OMP_LIBS)
+# El comando que realmente quieres: compila y luego ejecuta.
+run: build
+	@echo "--- Ejecutando el Proyecto ---"
+	@$(EXECUTABLE)
 
-# Frameworks de macOS para SFML (sin cambios)
-ifeq ($(UNAME_S),Darwin)
-    LIBS += -framework Cocoa -framework OpenGL -framework IOKit -framework Carbon -framework AudioUnit -framework CoreAudio -framework AVFoundation
-endif
-
-# --- Definiciones del Proyecto (sin cambios) ---
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
-OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
-
-# --- Reglas del Makefile ---
-.PHONY: all clean run help
-
-all: $(TARGET)
-
-# --- OMP-CHANGE: La regla de enlace ahora usa CXX=clang++ y los LDFLAGS/LIBS actualizados ---
-$(TARGET): $(OBJS)
-	@echo "LD -> $@"
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)
-	@echo "Ejecutable '$@' creado exitosamente."
-
-# --- OMP-CHANGE: La regla de compilación ahora usa CXX=clang++ y los CXXFLAGS actualizados ---
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR)
-	@echo "CXX -> $@"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
+# Limpia todos los archivos generados por CMake.
 clean:
-	@echo "Limpiando archivos compilados..."
-	rm -rf $(OBJ_DIR) $(TARGET)
-	@echo "Limpieza completada."
+	@echo "--- Limpiando el Directorio de Compilación ---"
+	@rm -rf $(BUILD_DIR)
 
-# --- OMP-CHANGE: El comando 'run' ya no usa mpiexec ---
-run: all
-	@echo "Ejecutando $(TARGET)..."
-	./$(TARGET)
-
-# --- OMP-CHANGE: El mensaje de ayuda ha sido actualizado para OpenMP ---
+# Un pequeño menú de ayuda.
 help:
 	@echo "Uso: make [target]"
-	@echo "Targets disponibles:"
-	@echo "  all     : Compila el proyecto (default)."
-	@echo "  run     : Compila y ejecuta el proyecto."
-	@echo "  clean   : Elimina los archivos generados por la compilación."
-	@echo "  help    : Muestra este mensaje de ayuda."
-	@echo ""
-	@echo "Este Makefile está configurado para compilar con OpenMP en macOS."
-	@echo "Dependencias requeridas (vía Homebrew): 'brew install sfml libomp'"
-	@echo ""
-	@echo "El Makefile intenta encontrar SFML y libomp automáticamente."
-	@echo "Si tus instalaciones están en rutas no estándar, puedes sobreescribirlas:"
-	@echo "  make SFML_BASE_DIR=/ruta/a/sfml OMP_BASE_DIR=/ruta/a/libomp"
+	@echo "  all      Compila el proyecto (default)."
+	@echo "  build    Compila el proyecto."
+	@echo "  run      Compila si es necesario y luego ejecuta el proyecto."
+	@echo "  clean    Elimina todos los archivos generados."
