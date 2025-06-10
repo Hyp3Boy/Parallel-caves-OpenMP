@@ -9,14 +9,12 @@
 #include "CaveGenerator.hpp"
 #include "MarchingSquares.hpp"
 
-// --- Constantes (sin cambios) ---
 const int GLOBAL_MAP_WIDTH = 160;
 const int GLOBAL_MAP_HEIGHT = 120;
 const float TILE_SIZE_PX = 6.0f;
 const int SMOOTHING_ITERATIONS = 5;
 const float INITIAL_FILL_PROBABILITY = 0.45f;
 
-// --- Máquina de Estados (sin cambios) ---
 enum class AppState
 {
     INITIALIZING,
@@ -25,7 +23,6 @@ enum class AppState
     DONE
 };
 
-// CORRECCIÓN: La función ahora crea dos triángulos por cada cuadrado de la rejilla.
 void updateGridVisuals(sf::VertexArray &triangles, const LocalGrid &grid)
 {
     triangles.clear();
@@ -119,7 +116,6 @@ int main(int argc, char *argv[])
                     std::vector<LineSegment> segments =
                             msAlgo.generateMesh(caveGen->getLocalGrid());
 
-                    // Este cambio a Lines sigue siendo correcto.
                     visuals.setPrimitiveType(sf::PrimitiveType::Lines);
                     visuals.clear();
                     for (const auto &seg : segments)
